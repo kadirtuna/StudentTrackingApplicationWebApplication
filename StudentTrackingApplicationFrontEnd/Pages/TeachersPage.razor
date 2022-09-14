@@ -1,0 +1,84 @@
+﻿@page "/teachers"
+@inject ITeacherService TeacherService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Teachers</PageTitle>
+
+<h3>Teachers</h3>
+
+
+<table class="table">
+    <AuthorizeView>
+        <Authorized>
+            @{
+                string role = @context.User.FindFirst(ClaimTypes.Role).Value;
+            }
+
+            <thead>
+            <th>Teacher Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            </thead>
+            <tbody>
+                @foreach (var teacher in Teachers)
+                {
+                    <tr>
+                        <td>@teacher.TeacherId</td>
+                        <td>@teacher.TeacherName</td>
+                        <td>@teacher.TeacherSurname</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => ShowTeacher(teacher.TeacherId))"><i class="oi oi-arrow-right"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => UpdateTeacher(teacher.TeacherId))"><i class="oi oi-cog"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(() => DeleteTeacher(teacher.TeacherId))"><i class="oi oi-trash"></i>"</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </Authorized>
+        <NotAuthorized>
+            <span>You're not logged in as an Admin or a Manager!</span>
+        </NotAuthorized>
+    </AuthorizeView>
+</table>
+<button class="btn btn-primary" @onclick="NavigateCreateTeacher">Create New Teacher!</button>
+
+@code {
+    List<Teacher> Teachers { get; set; } = new List<Teacher>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        Teachers = await TeacherService.GetTeachers();
+
+        if (TeacherService.responsedStatusCodeFirstDigit != 2)
+            TeacherService.Teachers = new List<Teacher>();
+    }
+
+    async Task ShowTeacher(int teacherId)
+    {
+        NavigationManager.NavigateTo($"teacherReadById/{teacherId}");
+    }
+
+    async Task UpdateTeacher(int teacherId)
+    {
+        NavigationManager.NavigateTo($"teacherUpdate/{teacherId}");
+    }
+
+    async Task DeleteTeacher(int teacherId)
+    {
+        await TeacherService.Remove(teacherId);
+        Teachers = await TeacherService.GetTeachers();
+        StateHasChanged();
+    }
+
+    async Task NavigateCreateTeacher()
+    {
+        NavigationManager.NavigateTo("teacherCreate");
+    }
+}

@@ -1,0 +1,50 @@
+﻿@page "/teacherReadById"
+@page "/teacherReadById/{teacherId:int}"
+@inject ITeacherService TeacherService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Query Teacher</PageTitle>
+<h3>Query Teacher</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Teacher Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>UserName</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@teacher.TeacherId</td>
+                    <td>@teacher.TeacherName</td>
+                    <td>@teacher.TeacherSurname</td>
+                    <td>@teacher.TeacherUserName</td>
+                    <td>@teacher.TeacherEmail</td>
+                    <td>@teacher.TeacherPhone</td>
+                </tr>
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int? teacherId { get; set; }
+    Teacher teacher = new Teacher();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (teacherId != null)
+            teacher = await TeacherService.GetTeacherById((int)teacherId);
+
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/managers"
+@inject IManagerService ManagerService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Managers</PageTitle>
+
+<h3>Managers</h3>
+
+
+<table class="table">
+    <AuthorizeView>
+        <Authorized>
+            <thead>
+            <th>Manager Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            </thead>
+            <tbody>
+                @foreach (var manager in Managers)
+                {
+                    <tr>
+                        <td>@manager.ManagerId</td>
+                        <td>@manager.ManagerName</td>
+                        <td>@manager.ManagerSurname</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => ShowManager(manager.ManagerId))"><i class="oi oi-arrow-right"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => UpdateManager(manager.ManagerId))"><i class="oi oi-cog"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(() => DeleteManager(manager.ManagerId))"><i class="oi oi-trash"></i>"</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </Authorized>
+        <NotAuthorized>
+            <span>You're not logged in as an Admin!</span>
+        </NotAuthorized>
+    </AuthorizeView>
+</table>
+<button class="btn btn-primary" @onclick="NavigateCreateManager">Create New Manager!</button>
+
+@code {
+    List<Manager> Managers { get; set; } = new List<Manager>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        Managers = await ManagerService.GetManagers();
+
+        if (ManagerService.responsedStatusCodeFirstDigit != 2)
+            ManagerService.Managers = new List<Manager>();
+    }
+
+    async Task ShowManager(int managerId)
+    {
+        NavigationManager.NavigateTo($"ManagerReadById/{managerId}");
+    }
+
+    async Task UpdateManager(int managerId)
+    {
+        NavigationManager.NavigateTo($"ManagerUpdate/{managerId}");
+    }
+
+    async Task DeleteManager(int managerId)
+    {
+        await ManagerService.Remove(managerId);
+        Managers = await ManagerService.GetManagers();
+        StateHasChanged();
+    }
+
+    async Task NavigateCreateManager()
+    {
+        NavigationManager.NavigateTo("ManagerCreate");
+    }
+}

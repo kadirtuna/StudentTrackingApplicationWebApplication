@@ -1,0 +1,50 @@
+﻿@page "/ManagerReadById"
+@page "/ManagerReadById/{managerId:int}"
+@inject IManagerService ManagerService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Query Manager</PageTitle>
+<h3>Query Manager</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Manager Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>UserName</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@manager.ManagerId</td>
+                    <td>@manager.ManagerName</td>
+                    <td>@manager.ManagerSurname</td>
+                    <td>@manager.ManagerUserName</td>
+                    <td>@manager.ManagerEmail</td>
+                    <td>@manager.ManagerPhone</td>
+                </tr>
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int? managerId { get; set; }
+    Manager manager = new Manager();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (managerId != null)
+            manager = await ManagerService.GetManagerById((int)managerId);
+
+    }
+}

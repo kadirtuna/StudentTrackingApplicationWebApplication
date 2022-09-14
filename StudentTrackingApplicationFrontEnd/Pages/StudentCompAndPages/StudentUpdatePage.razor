@@ -1,0 +1,82 @@
+﻿@page "/StudentUpdate"
+@page "/StudentUpdate/{StudentId:int}"
+@inject IStudentService StudentService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Student Update</PageTitle>
+<h3>Student Update</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Student Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@firstStudent.StudentId</td>
+                    <td>@firstStudent.StudentName</td>
+                    <td>@firstStudent.StudentSurname</td>
+                    <td>@firstStudent.StudentEmail</td>
+                    <td>@firstStudent.StudentPhone</td>
+                    <td>@firstStudent.StudentDebts</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledUpdateStudentDto" OnSubmit="(() => UpdateStudent(firstStudent.StudentId, filledUpdateStudentDto))" Context="StudentUpdatePage">
+            <p></p>
+            <label for="StudentName">Name:</label>
+            <InputText id="StudentName" @bind-Value=filledUpdateStudentDto.StudentName> </InputText>
+            <p></p>
+            <label for="StudentSurname">Surname:</label>
+            <InputText id="StudentSurname" @bind-Value=filledUpdateStudentDto.StudentSurname></InputText>
+            <p></p>
+            <label for="StudentEmail">E-Mail:</label>
+            <InputText id="StudentEmail" @bind-Value=filledUpdateStudentDto.StudentEmail></InputText>
+            <p></p>
+            <label for="StudentPhone">Phone Number: </label>
+            <InputText id="StudentPhone" @bind-Value=filledUpdateStudentDto.StudentPhone></InputText>
+            <p></p>
+            <label for="StudentDebts">Debts: </label>
+            <InputNumber id="StudentDebts" @bind-Value=filledUpdateStudentDto.StudentDebts></InputNumber>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Student!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int StudentId { get; set; } = 0;
+    ReadStudentDto firstStudent = new ReadStudentDto();
+    ReadStudentDto readStudentDto = new ReadStudentDto();
+    UpdateStudentDto filledUpdateStudentDto = new UpdateStudentDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        firstStudent = await StudentService.GetStudentDetailedById(StudentId);
+        filledUpdateStudentDto.StudentName = firstStudent.StudentName;
+        filledUpdateStudentDto.StudentSurname = firstStudent.StudentSurname;
+        filledUpdateStudentDto.StudentEmail = firstStudent.StudentEmail;
+        filledUpdateStudentDto.StudentPhone = firstStudent.StudentPhone;
+        filledUpdateStudentDto.StudentDebts = firstStudent.StudentDebts;
+        readStudentDto = firstStudent;
+
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task UpdateStudent(int studentId, UpdateStudentDto updateStudentDto)
+    {
+        await StudentService.Update(studentId, updateStudentDto);
+        NavigationManager.NavigateTo("/Students");
+    }
+}

@@ -1,0 +1,83 @@
+﻿@page "/students"
+@inject IStudentService StudentService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<table class="table">
+    <AuthorizeView>
+        <Authorized>
+            <thead>
+            <th>Student Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            </thead>
+            <tbody>
+                @foreach (var Student in Students)
+                {
+                    <tr>
+                        <td>@Student.StudentId</td>
+                        <td>@Student.StudentName</td>
+                        <td>@Student.StudentSurname</td>
+                                                <td>
+                            <button class="btn btn-primary" @onclick="(() => ShowStudentRestricted(Student.StudentId))"><i class="oi oi-arrow-right"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => ShowStudentDetailed(Student.StudentId))"><i class="oi oi-align-center"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => UpdateStudent(Student.StudentId))"><i class="oi oi-cog"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(() => DeleteStudent(Student.StudentId))"><i class="oi oi-trash"></i>"</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </Authorized>
+        <NotAuthorized>
+            <span>You're not logged in as an Admin or a Manager!</span>
+        </NotAuthorized>
+    </AuthorizeView>
+</table>
+<button class="btn btn-primary" @onclick="NavigateCreateStudent">Create New Student!</button>
+
+@code {
+    List<ReadStudentRestrictedDto> Students { get; set; } = new List<ReadStudentRestrictedDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        Students = await StudentService.GetStudentsRestricted();
+
+        if (StudentService.responsedStatusCodeFirstDigit != 2)
+            StudentService.StudentsRestricted = new List<ReadStudentRestrictedDto>();
+    }
+
+    async Task ShowStudentRestricted(int StudentId)
+    {
+        NavigationManager.NavigateTo($"StudentRestrictedReadById/{StudentId}");
+    }
+    async Task ShowStudentDetailed(int StudentId)
+    {
+        NavigationManager.NavigateTo($"StudentDetailedReadById/{StudentId}");
+    }
+
+    async Task UpdateStudent(int StudentId)
+    {
+        NavigationManager.NavigateTo($"StudentUpdate/{StudentId}");
+    }
+
+    async Task DeleteStudent(int StudentId)
+    {
+        await StudentService.Remove(StudentId);
+        Students = await StudentService.GetStudentsRestricted();
+        StateHasChanged();
+    }
+
+    async Task NavigateCreateStudent()
+    {
+        NavigationManager.NavigateTo("StudentCreate");
+    }
+}

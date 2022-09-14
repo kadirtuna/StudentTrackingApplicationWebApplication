@@ -1,0 +1,50 @@
+﻿@page "/"
+@layout LoginLayout
+@using StudentTrackingApplication.Shared.DTO
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+
+<h3>Login</h3>
+
+<EditForm Model="user" OnSubmit="HandleLogin">
+    <label for="username">Username</label>
+    <InputText id="username" @bind-Value=user.UserName></InputText>
+    <p></p>
+    <label for="password">Password</label>
+    <InputText id="password" @bind-Value=user.Password type="password"></InputText>
+    <button type="submit" class="btn btn-primary">Press to log in!</button>
+    <span class="alert-danger"><br />@errorMessage</span>
+</EditForm>
+
+@code {
+    UserDto user = new UserDto();
+
+    string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+    }
+
+    async Task HandleLogin()
+    {
+        var result = await Http.PostAsJsonAsync("api/auth/login", user);
+        var createdTokenDto = await result.Content.ReadFromJsonAsync<CreatedTokenDto>();
+        Console.WriteLine(createdTokenDto.token);
+
+        if (createdTokenDto.success == true)
+        {
+            await LocalStorage.SetItemAsync("token", createdTokenDto.token);
+            NavigationManager.NavigateTo("/counter");
+        }
+        else
+        {
+            await LocalStorage.RemoveItemAsync("token");
+            errorMessage = "You entered wrong Credentials!";
+        }
+
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+}

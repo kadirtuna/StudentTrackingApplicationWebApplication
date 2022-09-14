@@ -1,0 +1,104 @@
+﻿@page "/Courses"
+@inject ICourseService CourseService
+@inject ITeacherService TeacherService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Courses</PageTitle>
+<h3>Courses</h3>
+
+<table class="table">
+    <AuthorizeView>
+        <Authorized>
+            <thead>
+            <th>Course Id</th>
+            <th>Course Name</th>
+            <th>Course Credits</th>
+            <th>Course's Teacher</th>
+            </thead>
+            <tbody>
+                @{
+                    int i = 0;
+                }
+
+                @foreach (var course in Courses)
+                {
+                    <tr>
+                        <td>@course.CourseId</td>
+                        <td>@course.CourseName</td>
+                        <td>@course.CourseCredits ECTS</td>
+                        <td>@Teachers.ElementAt(i).TeacherName @Teachers.ElementAt(i).TeacherSurname</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => ShowCourse(course.CourseId))"><i class="oi oi-arrow-right"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="(() => UpdateCourse(course.CourseId))"><i class="oi oi-cog"></i>"</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(() => DeleteCourse(course.CourseId))"><i class="oi oi-trash"></i>"</button>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </Authorized>
+        <NotAuthorized>
+            <span>You're not logged in as an Admin or a Manager!</span>
+        </NotAuthorized>
+    </AuthorizeView>
+</table>
+<button class="btn btn-primary" @onclick="NavigateCreateCourse">Create New Course!</button>
+<button class="btn btn-primary" @onclick="NavigateCreateCourse">Courses Prices!</button>
+
+@code {
+    List<ReadCourseDto> Courses { get; set; } = new List<ReadCourseDto>();
+    List<Teacher> Teachers { get; set; } = new List<Teacher>();
+    Teacher[] Teachers2 { get; set; } = new Teacher[10];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        Courses = await CourseService.GetCourses();
+
+        foreach (var course in Courses)
+        {
+            Teacher teacher = await TeacherService.GetTeacherById(course.TeacherId);
+            //Teachers[counter] = teacher;
+            Teachers.Add(teacher);
+        }
+
+        if (CourseService.responsedStatusCodeFirstDigit != 2)
+            CourseService.Courses = new List<ReadCourseDto>();
+    }
+
+    async Task ShowCourse(int courseId)
+    {
+        NavigationManager.NavigateTo($"CourseReadById/{courseId}");
+    }
+
+    async Task UpdateCourse(int courseId)
+    {
+        NavigationManager.NavigateTo($"CourseUpdate/{courseId}");
+    }
+
+    async Task DeleteCourse(int courseId)
+    {
+        await CourseService.Remove(courseId);
+        Courses = await CourseService.GetCourses();
+        StateHasChanged();
+    }
+
+    async Task<string> FindTeacher(int teacherId)
+    {
+        Teacher teacher = await TeacherService.GetTeacherById(3);
+        string nameSurname = teacher.TeacherName + teacher.TeacherSurname;
+
+        return nameSurname.ToString();
+    }
+
+    async Task NavigateCreateCourse()
+    {
+        NavigationManager.NavigateTo("CourseCreate");
+    }
+}

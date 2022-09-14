@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>BLL_BusinessLogicLayer_</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DAL(DataAccessLayer)\StudentTrackingApplicationBackEnd_DAL.csproj" />
+    <ProjectReference Include="..\PL(PresentationLayer)\StudentTrackingApplicationBackEnd_PL.csproj" />
+  </ItemGroup>
+
+</Project>

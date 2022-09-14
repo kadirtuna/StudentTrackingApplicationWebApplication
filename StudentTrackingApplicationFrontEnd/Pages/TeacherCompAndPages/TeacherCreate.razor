@@ -1,0 +1,64 @@
+﻿@page "/teacherCreate"
+@inject ITeacherService TeacherService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Teacher Create</PageTitle>
+<h3>Teacher Create</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@filledCreateTeacherDto.TeacherName</td>
+                    <td>@filledCreateTeacherDto.TeacherSurname</td>
+                    <td>@filledCreateTeacherDto.TeacherEmail</td>
+                    <td>@filledCreateTeacherDto.TeacherPhone</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateTeacherDto" OnSubmit="(() => CreateTeacher(filledCreateTeacherDto))" Context="TeacherUpdatePage">
+            <p></p>
+            <label for="teacherName">Name:</label>
+            <InputText id="teacherName" @bind-Value=filledCreateTeacherDto.TeacherName> </InputText>
+            <p></p>
+            <label for="teacherSurname">Surname:</label>
+            <InputText id="teacherSurname" @bind-Value=filledCreateTeacherDto.TeacherSurname></InputText>
+            <p></p>
+            <label for="teacherEmail">E-Mail:</label>
+            <InputText id="teacherEmail" @bind-Value=filledCreateTeacherDto.TeacherEmail></InputText>
+            <p></p>
+            <label for="teacherPhone">Phone Number: </label>
+            <InputText id="teacherPhone" @bind-Value=filledCreateTeacherDto.TeacherPhone></InputText>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    CreateTeacherDto filledCreateTeacherDto = new CreateTeacherDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task CreateTeacher(CreateTeacherDto createTeacherDto)
+    {
+        await TeacherService.Add(createTeacherDto);
+        NavigationManager.NavigateTo("/teachers");
+    }
+}

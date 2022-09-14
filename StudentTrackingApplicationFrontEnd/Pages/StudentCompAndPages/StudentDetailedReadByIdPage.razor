@@ -1,0 +1,56 @@
+﻿@page "/StudentDetailedReadById"
+@page "/StudentDetailedReadById/{StudentId:int}"
+@inject IStudentService StudentService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Query Student</PageTitle>
+<h3>Query Student</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Student Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>Username</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            <th>Total Course Credits</th>
+            <th>General Average Mark</th>
+            <th>Debts</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@student.StudentId</td>
+                    <td>@student.StudentName</td>
+                    <td>@student.StudentSurname</td>
+                    <td>@student.StudentUserName</td>
+                    <td>@student.StudentEmail</td>
+                    <td>@student.StudentPhone</td>
+                    <td>@student.StudentTotalCourseCredits</td>
+                    <td>@student.StudentGeneralAverageMark</td>
+                    <td>@student.StudentDebts</td>
+                </tr>
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    ReadStudentDto student = new ReadStudentDto();
+
+    [Parameter]
+    public int StudentId { get; set; }
+
+    protected override async Task OnParametersSetAsync()    
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (StudentId != null)
+            student = await StudentService.GetStudentDetailedById((int)StudentId);
+    }
+}

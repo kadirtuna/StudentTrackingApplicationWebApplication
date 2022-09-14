@@ -1,0 +1,64 @@
+﻿@page "/StudentCreate"
+@inject IStudentService StudentService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Student Create</PageTitle>
+<h3>Student Create</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@filledCreateStudentDto.StudentName</td>
+                    <td>@filledCreateStudentDto.StudentSurname</td>
+                    <td>@filledCreateStudentDto.StudentEmail</td>
+                    <td>@filledCreateStudentDto.StudentPhone</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateStudentDto" OnSubmit="(() => CreateStudent(filledCreateStudentDto))" Context="StudentUpdatePage">
+            <p></p>
+            <label for="StudentName">Name:</label>
+            <InputText id="StudentName" @bind-Value=filledCreateStudentDto.StudentName> </InputText>
+            <p></p>
+            <label for="StudentSurname">Surname:</label>
+            <InputText id="StudentSurname" @bind-Value=filledCreateStudentDto.StudentSurname></InputText>
+            <p></p>
+            <label for="StudentEmail">E-Mail:</label>
+            <InputText id="StudentEmail" @bind-Value=filledCreateStudentDto.StudentEmail></InputText>
+            <p></p>
+            <label for="StudentPhone">Phone Number: </label>
+            <InputText id="StudentPhone" @bind-Value=filledCreateStudentDto.StudentPhone></InputText>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Student!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    CreateStudentDto filledCreateStudentDto = new CreateStudentDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task CreateStudent(CreateStudentDto createStudentDto)
+    {
+        await StudentService.Add(createStudentDto);
+        NavigationManager.NavigateTo("/Students");
+    }
+}

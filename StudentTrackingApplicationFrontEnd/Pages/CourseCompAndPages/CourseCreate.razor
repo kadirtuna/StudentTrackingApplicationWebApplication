@@ -1,0 +1,112 @@
+﻿@page "/CourseCreate"
+@inject ICourseService CourseService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Course Create</PageTitle>
+<h3>Course Create</h3>
+
+@*public string CourseName { get; set; } = null;
+        public int CourseCredits { get; set; } = 0;
+        public int CourseNumbers { get; set; } = 0;
+        public int TeacherId { get; set; } = 0;
+        public int CourseTotalPrice { get; set; } = 0;
+        public int CourseDays { get; set; } = 0;//The guideline about CourseDays is in the comment block below.
+        public int TimeFirst2Digits { get; set; } = 0;
+        public int TimeLast2Digits { get; set; } = 0;*@
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Course Name</th>
+            <th>Course Credits</th>
+            <th>Course Numbers</th>
+            <th>Teacher Id</th>
+            <th>Course Price</th>
+            <th>Course Days</th>
+            <th>Course Time First 2 Digits</th>
+            <th>Course Time Last 2 Digits</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@filledCreateCourseDto.CourseName</td>
+                    <td>@filledCreateCourseDto.CourseCredits</td>
+                    <td>@filledCreateCourseDto.CourseNumbers</td>
+                    <td>@filledCreateCourseDto.TeacherId</td>
+                    <td>@filledCreateCourseDto.CourseTotalPrice</td>
+                    <td>@filledCreateCourseDto.CourseDays</td>
+                    <td>@filledCreateCourseDto.TimeFirst2Digits</td>
+                    <td>@filledCreateCourseDto.TimeLast2Digits</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateCourseDto" OnSubmit="(() => CreateCourse(filledCreateCourseDto))" Context="CourseUpdatePage">
+            <p></p>
+            <label for="CourseName">Course Name:</label>
+            <InputText id="CourseName" @bind-Value=filledCreateCourseDto.CourseName> </InputText>
+            <p></p>
+            <label for="CourseCredits">Course Credits:</label>
+            <InputNumber id="CourseCredits" @bind-Value=filledCreateCourseDto.CourseCredits></InputNumber>
+            <p></p>
+            <label for="CourseNumbers">Course Numbers:</label>
+            <InputNumber id="CourseNumbers" @bind-Value=filledCreateCourseDto.CourseNumbers></InputNumber>
+            <p></p>
+            <label for="TeacherId">Teacher Id: </label>
+            <InputNumber id="TeacherId" @bind-Value=filledCreateCourseDto.TeacherId></InputNumber>
+            <p></p>
+            <label for="CourseTotalPrice">Course Price:</label>
+            <InputNumber id="CourseTotalPrice" @bind-Value=filledCreateCourseDto.CourseTotalPrice> </InputNumber>
+            <p></p>
+            <label for="CourseDays">Course Days:</label>
+            <InputNumber id="CourseDays" @bind-Value=filledCreateCourseDto.CourseDays> </InputNumber>
+            <p></p>
+            <label for="TimeFirst2Digits">Time First 2 Digits:</label>
+            <InputNumber id="TimeFirst2Digits" @bind-Value=filledCreateCourseDto.TimeFirst2Digits> </InputNumber>
+            <p></p>
+            <label for="TimeLast2Digits">Time Last 2 Digits:</label>
+            <InputNumber id="TimeLast2Digits" @bind-Value=filledCreateCourseDto.TimeLast2Digits> </InputNumber>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+<p>
+    <b>The CourseDays Table is here below;</b><br />
+    1 - Monday,<br />
+    2 - Tuesday,<br />
+    3 - Wednesday,<br />
+    4 - Thursday,<br />
+    5 - Friday,<br />
+    6 - Monday and Tuesday,<br />
+    7 - Monday and Wednesday,<br />
+    8 - Monday and Thursday,<br />
+    9 - Monday and Friday,<br />
+    10 - Tuesday and Wednesday,<br />
+    11 - Tuesday and Thurday,<br />
+    12 - Tuesday and Friday,<br />
+    13 - Wednesday and Thursday,<br />
+    14 - Wednesday and Friday,<br />
+    15 - Thursday and Friday<br />
+
+
+</p>
+@code {
+
+    CreateCourseDto filledCreateCourseDto = new CreateCourseDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task CreateCourse(CreateCourseDto createCourseDto)
+    {
+        await CourseService.Add(createCourseDto);
+        NavigationManager.NavigateTo("/Courses");
+    }
+}

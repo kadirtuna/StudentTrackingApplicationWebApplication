@@ -1,0 +1,79 @@
+﻿@page "/teacherUpdate"
+@page "/teacherUpdate/{teacherId:int}"
+@inject ITeacherService TeacherService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Teacher Update</PageTitle>
+<h3>Teacher Update</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Teacher Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>UserName</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@firstTeacher.TeacherId</td>
+                    <td>@firstTeacher.TeacherName</td>
+                    <td>@firstTeacher.TeacherSurname</td>
+                    <td>@firstTeacher.TeacherUserName</td>
+                    <td>@firstTeacher.TeacherEmail</td>
+                    <td>@firstTeacher.TeacherPhone</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateTeacherDto" OnSubmit="(() => UpdateTeacher(firstTeacher.TeacherId, filledCreateTeacherDto))" Context="TeacherUpdatePage">
+            <p></p>
+            <label for="teacherName">Name:</label>
+            <InputText id="teacherName" @bind-Value=filledCreateTeacherDto.TeacherName> </InputText>
+            <p></p>
+            <label for="teacherSurname">Surname:</label>
+            <InputText id="teacherSurname" @bind-Value=filledCreateTeacherDto.TeacherSurname></InputText>
+            <p></p>
+            <label for="teacherEmail">E-Mail:</label>
+            <InputText id="teacherEmail" @bind-Value=filledCreateTeacherDto.TeacherEmail></InputText>
+            <p></p>
+            <label for="teacherPhone">Phone Number: </label>
+            <InputText id="teacherPhone" @bind-Value=filledCreateTeacherDto.TeacherPhone></InputText>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int teacherId { get; set; } = 0;
+    Teacher firstTeacher = new Teacher();
+    Teacher teacher = new Teacher();
+    CreateTeacherDto filledCreateTeacherDto = new CreateTeacherDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        firstTeacher = await TeacherService.GetTeacherById(teacherId);
+        filledCreateTeacherDto.TeacherName = firstTeacher.TeacherName;
+        filledCreateTeacherDto.TeacherSurname = firstTeacher.TeacherSurname;
+        filledCreateTeacherDto.TeacherEmail = firstTeacher.TeacherEmail;
+        filledCreateTeacherDto.TeacherPhone = firstTeacher.TeacherPhone;
+        teacher = firstTeacher;
+
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task UpdateTeacher(int teacherId, CreateTeacherDto createTeacherDto)
+    {
+        await TeacherService.Update(teacherId, createTeacherDto);
+        NavigationManager.NavigateTo("/teachers");
+    }
+}

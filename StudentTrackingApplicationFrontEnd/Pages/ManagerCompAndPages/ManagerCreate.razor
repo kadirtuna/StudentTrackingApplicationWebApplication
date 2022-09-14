@@ -1,0 +1,64 @@
+﻿@page "/ManagerCreate"
+@inject IManagerService ManagerService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Manager Create</PageTitle>
+<h3>Manager Create</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@filledCreateManagerDto.ManagerName</td>
+                    <td>@filledCreateManagerDto.ManagerSurname</td>
+                    <td>@filledCreateManagerDto.ManagerEmail</td>
+                    <td>@filledCreateManagerDto.ManagerPhone</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateManagerDto" OnSubmit="(() => CreateManager(filledCreateManagerDto))" Context="ManagerUpdatePage">
+            <p></p>
+            <label for="ManagerName">Name:</label>
+            <InputText id="ManagerName" @bind-Value=filledCreateManagerDto.ManagerName> </InputText>
+            <p></p>
+            <label for="ManagerSurname">Surname:</label>
+            <InputText id="ManagerSurname" @bind-Value=filledCreateManagerDto.ManagerSurname></InputText>
+            <p></p>
+            <label for="ManagerEmail">E-Mail:</label>
+            <InputText id="ManagerEmail" @bind-Value=filledCreateManagerDto.ManagerEmail></InputText>
+            <p></p>
+            <label for="ManagerPhone">Phone Number: </label>
+            <InputText id="ManagerPhone" @bind-Value=filledCreateManagerDto.ManagerPhone></InputText>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    CreateManagerDto filledCreateManagerDto = new CreateManagerDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task CreateManager(CreateManagerDto createManagerDto)
+    {
+        await ManagerService.Add(createManagerDto);
+        NavigationManager.NavigateTo("/Managers");
+    }
+}

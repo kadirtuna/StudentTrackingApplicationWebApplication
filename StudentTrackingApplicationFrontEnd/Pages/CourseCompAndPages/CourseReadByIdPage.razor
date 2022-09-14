@@ -1,0 +1,77 @@
+﻿@page "/CourseReadById"
+@page "/CourseReadById/{CourseId:int}"
+@inject ICourseService CourseService
+@inject ITeacherService TeacherService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Query Course</PageTitle>
+<h3>Query Course</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Course Id</th>
+            <th>Course Name</th>
+            <th>Course Credits</th>
+            <th>Course Numbers</th>
+            <th>Course's Teacher</th>
+            <th>Course Price</th>
+                @*<th>Course Created Date</th>*@
+            <th>Course Start Date</th>
+            <th>Course Days</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Course.CourseId</td>
+                    <td>@Course.CourseName</td>
+                    <td>@Course.CourseCredits ECTS</td> 
+                    <td>@Course.CourseNumbers times</td>
+                    <td>@Teacher.TeacherName @Teacher.TeacherSurname</td>
+                    <td>@Course.CourseTotalPrice TL</td>
+                    @*<td>@Course.CourseCreatedDate</td>*@
+                    <td>@Course.CourseStartDate</td>
+                    <td>
+
+                        @foreach (var CourseDay in CourseDaysList)
+                        {
+                            @CourseDaysDictionary[CourseDay]
+                            <p></p>
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int? CourseId { get; set; }
+    ReadCourseDto Course = new ReadCourseDto();
+    Teacher Teacher { get; set; } = new Teacher();
+    List<int> CourseDaysList = new List<int>();
+    IDictionary<int, string> CourseDaysDictionary = new Dictionary<int, string>()
+    {
+        {1, "Monday"},
+        {2, "Tuesday"},
+        {3, "Wednesday"},
+        {4, "Thursday"},
+        {5, "Friday"}
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (CourseId != null)
+            Course = await CourseService.GetCourseById((int)CourseId);
+
+        Teacher = await TeacherService.GetTeacherById(Course.TeacherId);
+
+        CourseDaysList = CreateCourseDto.DayAdjuster(Course.CourseDays);
+    }
+}

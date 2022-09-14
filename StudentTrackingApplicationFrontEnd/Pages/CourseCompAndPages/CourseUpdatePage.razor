@@ -1,0 +1,93 @@
+﻿@page "/CourseUpdate"
+@page "/CourseUpdate/{CourseId:int}"
+@inject ICourseService CourseService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Course Update</PageTitle>
+<h3>Course Update</h3>
+@*
+<AuthorizeView>
+    <Authorized>
+        <table class="table">
+            <thead>
+            <th>Course Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>UserName</th>
+            <th>E-Mail</th>
+            <th>Telephone Number</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@firstCourse.CourseId</td>
+                    <td>@firstCourse.CourseName</td>
+                    <td>@firstCourse.CourseSurname</td>
+                    <td>@firstCourse.CourseUserName</td>
+                    <td>@firstCourse.CourseEmail</td>
+                    <td>@firstCourse.CoursePhone</td>
+                </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <EditForm Model="filledCreateCourseDto" OnSubmit="(() => UpdateCourse(firstCourse.CourseId, filledCreateCourseDto))" Context="CourseUpdatePage">
+            <p></p>
+            <label for="CourseName">Name:</label>
+            <InputText id="CourseName" @bind-Value=filledCreateCourseDto.CourseName> </InputText>
+            <p></p>
+            <label for="CourseSurname">Surname:</label>
+            <InputText id="CourseSurname" @bind-Value=filledCreateCourseDto.CourseSurname></InputText>
+            <p></p>
+            <label for="CourseEmail">E-Mail:</label>
+            <InputText id="CourseEmail" @bind-Value=filledCreateCourseDto.CourseEmail></InputText>
+            <p></p>
+            <label for="CoursePhone">Phone Number: </label>
+            <InputText id="CoursePhone" @bind-Value=filledCreateCourseDto.CoursePhone></InputText>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not logged in as an Admin or a Manager!</span>
+    </NotAuthorized>
+</AuthorizeView>*@
+
+@code {
+    [Parameter]
+    public int CourseId { get; set; } = 0;
+    ReadCourseDto firstCourse = new ReadCourseDto();
+    ReadCourseDto Course = new ReadCourseDto();
+    Course filledCreateCourseDto = new Course();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //firstCourse = await CourseService.GetCourseById(CourseId);
+        //filledCreateCourseDto.CourseId = firstCourse.CourseId;
+        //filledCreateCourseDto.CourseName = firstCourse.CourseName;
+        //filledCreateCourseDto.CourseCredits = firstCourse.CourseCredits;
+        //filledCreateCourseDto.CourseNumbers = firstCourse.CourseNumbers;
+        //filledCreateCourseDto.TeacherId = firstCourse.TeacherId;
+        //filledCreateCourseDto.CourseTotalPrice = firstCourse.CourseTotalPrice;
+        //filledCreateCourseDto.CourseCreatedDate = firstCourse.CourseCreatedDate;
+        //filledCreateCourseDto.CourseStartDate = firstCourse.CourseStartDate;
+        filledCreateCourseDto.CourseDays = firstCourse.CourseDays;
+        Course = firstCourse;
+
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    async Task UpdateCourse(int courseId, Course createCourseDto)
+    {
+        await CourseService.Update(courseId, createCourseDto);
+        NavigationManager.NavigateTo("/Courses");
+    }
+}
+ @*       public int CourseId { get; set; } = 0;
+        public string CourseName { get; set; } = string.Empty;
+        public int CourseCredits { get; set; } = 0;
+        public int CourseNumbers { get; set; } = 0;
+        public int TeacherId { get; set; } = 0;
+        public int CourseTotalPrice { get; set; } = 0;
+        public DateTime CourseCreatedDate { get; set; } = DateTime.MinValue;
+        public DateTime CourseStartDate { get; set; } = DateTime.MinValue;
+        public int CourseDays { get; set; } = 0;*@
